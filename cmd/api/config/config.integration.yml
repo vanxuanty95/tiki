@@ -1,0 +1,11 @@
+restful_api:
+  host: "localhost"
+  port: "8080"
+db:
+  host: "localhost"
+  port: "3306"
+  database: "booking"
+  username: "user"
+  password: "password"
+jwt_key: "wqGyEBBfPK9w3Lxw"
+ss_expire: 15m
