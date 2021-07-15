@@ -7,9 +7,9 @@ package mock
 import (
 	context "context"
 	reflect "reflect"
+	storages "tiki/internal/api/user/storages"
 
 	gomock "github.com/golang/mock/gomock"
-	storages "tiki/internal/api/user/storages"
 )
 
 // MockStore is a mock of Store interface.
@@ -35,17 +35,17 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
-// Get mocks base method.
-func (m *MockStore) Get(arg0 context.Context, arg1 string) (*storages.User, error) {
+// GetUserByID mocks base method.
+func (m *MockStore) GetUserByID(arg0 context.Context, arg1 string) (*storages.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetUserByID", arg0, arg1)
 	ret0, _ := ret[0].(*storages.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Get indicates an expected call of Get.
-func (mr *MockStoreMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call {
+// GetUserByID indicates an expected call of GetUserByID.
+func (mr *MockStoreMockRecorder) GetUserByID(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockStore)(nil).Get), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockStore)(nil).GetUserByID), arg0, arg1)
 }

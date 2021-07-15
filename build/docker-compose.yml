@@ -16,23 +16,5 @@ services:
     volumes:
       - db:/var/lib/mysql
 
-  booking:
-    container_name: tiki_go
-    image: golang:1.13
-    ports:
-      - "8080:8080"
-    command: go run api.go
-    environment:
-      - LISTEN=:8080
-    depends_on:
-      - db
-    links:
-      - db
-    volumes:
-      - ../:/go/src/tiki
-      - go-pkg:/go/pkg
-    working_dir: /go/src/tiki/cmd/api
-
 volumes:
   db:
-  go-pkg:

@@ -12,4 +12,7 @@ var (
 	ScreenIsNotExists            = "screen is not exists"
 	FailedToGetUser              = "failed to get user"
 	StoreScreenFailed            = "screen new screen failed"
+	SeatBooked                   = "the seat has been booked or does not meet social distancing requirements"
+
+	OkSeat = "ok! the seat available"
 )

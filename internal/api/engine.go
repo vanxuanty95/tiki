@@ -61,10 +61,10 @@ func CreateHandler(cfg *config.Config) (*UserHandler.User, *BookingHandler.Booki
 		Store: userStore,
 	}
 	bookingUC := bookingUseCase.Booking{
-		Cfg:             cfg,
-		Store:           bookingStore,
-		UserStore:       userStore,
-		GeneratorUUIDFn: utils.GenerateNewUUID,
+		Cfg:          cfg,
+		Store:        bookingStore,
+		UserStore:    userStore,
+		GetTimeNowFn: utils.GetTimeNow,
 	}
 
 	return &UserHandler.User{

@@ -15,10 +15,10 @@ import (
 )
 
 type Booking struct {
-	Cfg             *config.Config
-	Store           storages.Store
-	UserStore       userStorages.Store
-	GeneratorUUIDFn utils.GenerateNewUUIDFn
+	Cfg          *config.Config
+	Store        storages.Store
+	UserStore    userStorages.Store
+	GetTimeNowFn utils.GetTimeNowFn
 }
 
 type Ring struct {
@@ -33,15 +33,15 @@ type SeatWithoutID struct {
 	column int
 }
 
-func (s *Booking) CreateNewScreen(ctx context.Context, userID string, screen *storages.Screen) (*int, error) {
-	now := utils.GetTimeNow()
+func (s *Booking) CreateNewScreen(ctx context.Context, userID string, screen *storages.Screen) (int, error) {
+	now := s.GetTimeNowFn()
 
 	screen.UserID = userID
 	screen.CreatedDate = now
 
 	if id, err := s.Store.InsertScreen(ctx, screen); err != nil {
 		logger.TIKIErrorln(ctx, err)
-		return nil, errors.New(dictionary.StoreScreenFailed)
+		return 0, errors.New(dictionary.StoreScreenFailed)
 	} else {
 		return id, nil
 	}
@@ -64,7 +64,7 @@ func (s *Booking) CheckAvailable(ctx context.Context, userID string, rq *model.C
 		return nil
 	}
 
-	return errors.New("oh")
+	return errors.New(dictionary.SeatBooked)
 }
 
 func (s *Booking) BookingNewSeat(ctx context.Context, userID string, bookingRq *model.BookingRequest) ([]*storages.Seat, error) {
@@ -92,7 +92,7 @@ func (s *Booking) BookingNewSeat(ctx context.Context, userID string, bookingRq *
 	if len(seats) > 0 {
 		for _, seat := range seats {
 			seat.UserID = userID
-			seat.BookedDate = utils.GetTimeNow()
+			seat.BookedDate = s.GetTimeNowFn()
 		}
 		err = s.Store.InsertSeats(ctx, seats)
 		if err != nil {
@@ -215,7 +215,7 @@ func (s *Booking) isOk(currentSeats []*storages.Seat, newSeats []*storages.Seat)
 }
 
 func (s *Booking) randomStartPoint(screen *storages.Screen) *storages.Seat {
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(s.GetTimeNowFn().UnixNano())
 	row := rand.Intn(screen.NumberSeatRow)
 	column := rand.Intn(screen.NumberSeatColumn)
 	return &storages.Seat{
@@ -233,7 +233,7 @@ func (s *Booking) randomsShapeFromStartPoint(startPoint *storages.Seat, screen *
 		var aSetSeats []*storages.Seat
 		aSetSeats = append(aSetSeats, startPoint)
 		for len(aSetSeats) < numberSeat {
-			rand.Seed(time.Now().UnixNano())
+			rand.Seed(s.GetTimeNowFn().UnixNano())
 			newSeat := &storages.Seat{}
 			for _, seat := range aSetSeats {
 				ok := false

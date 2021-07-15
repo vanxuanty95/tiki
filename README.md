@@ -1,7 +1,10 @@
 ## Introduce
-This is a simple backend for a good old booking service, right now this service can handle login/list/create simple bookings.  
+This is a simple backend service for movie theater ticket booking
 The application will never return the client the exact error from the server, if you want details please see the console log.
-The Login API will return a JSON token without setting a cookie so that it can be easily used by Fontend or another service as this application can be part of many services.
+
+Required from social distancing, each seat/group of seats will have a distance from each other of x (x is configured in the config file)
+
+By default, service will run with port 8080
 
 ## Install and Run
 ### Requirements
@@ -11,7 +14,13 @@ The Login API will return a JSON token without setting a cookie so that it can b
 The fast way to run the service is by executing "make" target from root folder of the repository:
 - `make init`
 - `make docker_up`
-- `make run`
+- `make run_directly`
+
+if want to run by docker image:
+- `make init`
+- `make docker_up`
+- `make build_image`
+- `make run_container`
 
 ## Guide
 
@@ -37,7 +46,7 @@ To change the configuration information about the server, the database you can e
 #Structure
 Separate 2 separate API parts for Booking and User
 
-Storages layer is in internal/api/{each API}/storages which have 2 drivers: mysql and sqlite to interact with database, no business logic in this layer.
+Storages layer is in internal/api/{each API}/storages which is mysql, no business logic in this layer.
 
 Use case layer is in internal/api/{each API}/usecases which handle business core and use storage layer to reach DB.
 
@@ -47,47 +56,66 @@ Before entering Handlers layer, middleware will print request information to log
 
 # Interact with the API
 
+Please get postman file in `docs/` directory
+
 __Login__
 
-```curl -X POST  -d '{"user_id":"firstUser","password":"example"}' "http://localhost:5050/login"```
+```curl -X POST  -d '{"user_id":"tester","password":"example"}' "http://localhost:8080/login"```
 
-__Get list bookings__
+__Create a screen__
 
-```curl -H "Authorization: Basic <_your_token_>" "http://localhost:5050/bookings?created_date=2020-06-29"```
+```curl -X POST -H -d '{"number_seat_row":5, "number_seat_column":6}' "http://localhost:8080/screen"```
 
-```curl -H "Authorization: Basic <_your_token_>" "http://localhost:5050/bookings?created_date=2020-06-29?page=1"```
+__Check seat available__
 
-```curl -H "Authorization: Basic <_your_token_>" "http://localhost:5050/bookings?created_date=2020-06-29?page=1?limit=10"```
+```curl -X POST -H -d '{"screen_id": 1,"location": {"row": 1,"column": 1}}' "http://localhost:8080/check"```
 
-__Create a booking__
+__Book random seats__
 
-```curl -X POST -H "Authorization: Basic <_your_token_>" -d '{"content":"your content"}' "http://localhost:5050/bookings"```
+```curl -X POST -H -d '{"screen_id": 1,"number": 1}' "http://localhost:8080/booking"```
+
+```curl -X POST -H -d '{"screen_id": 1,"number": 3}' "http://localhost:8080/booking"```
+
+__Book exactly seats__
+
+```curl -X POST -H -d '{"screen_id": 1,"locations": [{"row": 2,"column": 3}]}' "http://localhost:8080/booking"```
 
 
 ### DB Schema
 ```sql
 -- users definition
 
-CREATE TABLE users (
-	id TEXT NOT NULL,
-	password TEXT NOT NULL,
-	max_booking INTEGER DEFAULT 5 NOT NULL,
-	CONSTRAINT users_PK PRIMARY KEY (id)
-);
+CREATE TABLE IF NOT EXISTS `user` (
+                                      `id` varchar(50) NOT NULL,
+                                      `password` varchar(200) NOT NULL,
+                                      PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-INSERT INTO users (id, password, max_booking) VALUES('firstUser', '$2a$14$BdgOuNVBU7sdGW9rIDIIv.MWXDdvTVKyTppb3qW03bmvz/6hhA1FO', 5);
+CREATE TABLE IF NOT EXISTS `screen` (
+                                        `id` int(11) NOT NULL AUTO_INCREMENT,
+                                        `number_seat_row` int(11) NOT NULL,
+                                        `number_seat_column` int(11) NOT NULL,
+                                        `created_date` datetime NOT NULL,
+                                        `user_id` varchar(20) NOT NULL,
+                                        PRIMARY KEY (`id`),
+                                        KEY `user_id_idx_screen_id` (`user_id`),
+                                        CONSTRAINT `screen_id_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 
--- bookings definition
-
-CREATE TABLE bookings (
-	id TEXT NOT NULL,
-	content TEXT NOT NULL,
-	user_id TEXT NOT NULL,
-    created_date TEXT NOT NULL,
-	CONSTRAINT bookings_PK PRIMARY KEY (id),
-	CONSTRAINT bookings_FK FOREIGN KEY (user_id) REFERENCES users(id)
-);
+CREATE TABLE IF NOT EXISTS  `seat` (
+                                       `id` int(11) NOT NULL AUTO_INCREMENT,
+                                       `row_id` int(11) NOT NULL,
+                                       `column_id` int(11) NOT NULL,
+                                       `user_id` varchar(50) NOT NULL,
+                                       `screen_id` int(11) NOT NULL,
+                                       `booked_date` datetime NOT NULL,
+                                       PRIMARY KEY (`id`,`row_id`,`column_id`),
+                                       KEY `user_id_idx` (`user_id`),
+                                       KEY `id_idx` (`screen_id`),
+                                       CONSTRAINT `screen_id` FOREIGN KEY (`screen_id`) REFERENCES `screen` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+                                       CONSTRAINT `user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 ```
 
 ### Sequence diagram
-![auth and create bookings request](https://tiki/blob/master/docs/sequence.svg)
+![auth and create bookings request](https://tiki/blob/master/docs/sequence.png)

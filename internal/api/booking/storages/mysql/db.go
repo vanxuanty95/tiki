@@ -14,18 +14,17 @@ type MySQLDB struct {
 }
 
 // InsertScreen will create new screen.
-func (l *MySQLDB) InsertScreen(ctx context.Context, s *storages.Screen) (*int, error) {
+func (l *MySQLDB) InsertScreen(ctx context.Context, s *storages.Screen) (int, error) {
 	query := `INSERT INTO screen (number_seat_row, number_seat_column, created_date, user_id) VALUES (?, ?, ?, ?)`
 	res, err := l.DB.ExecContext(ctx, query, &s.NumberSeatRow, &s.NumberSeatColumn, &s.CreatedDate, &s.UserID)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	newID, err := res.LastInsertId()
-	newIDInt := int(newID)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	return &newIDInt, nil
+	return int(newID), nil
 }
 
 func (l *MySQLDB) GetScreenByID(ctx context.Context, id int) (*storages.Screen, error) {

@@ -57,7 +57,7 @@ func (t *Booking) AddScreen(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(ctx, resp, http.StatusOK, map[string]int{"id": *id}, nil)
+	utils.WriteJSON(ctx, resp, http.StatusOK, map[string]int{"id": id}, nil)
 }
 
 func (t *Booking) Booking(resp http.ResponseWriter, req *http.Request) {
@@ -94,6 +94,11 @@ func (t *Booking) Booking(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if len(seats) == 0 {
+		utils.WriteJSON(ctx, resp, http.StatusInternalServerError, nil, errors.New(dictionary.SeatBooked))
+		return
+	}
+
 	utils.WriteJSON(ctx, resp, http.StatusOK, seats, nil)
 }
 
@@ -125,5 +130,5 @@ func (t *Booking) Check(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(ctx, resp, http.StatusOK, "ok", nil)
+	utils.WriteJSON(ctx, resp, http.StatusOK, dictionary.OkSeat, nil)
 }

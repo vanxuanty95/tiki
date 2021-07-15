@@ -1,6 +1,6 @@
 restful_api:
   host: "localhost"
-  port: "8080"
+  port: "5050"
 db:
   host: "localhost"
   port: "3306"
@@ -9,3 +9,4 @@ db:
   password: "password"
 jwt_key: "wqGyEBBfPK9w3Lxw"
 ss_expire: 15m
+distance: 2

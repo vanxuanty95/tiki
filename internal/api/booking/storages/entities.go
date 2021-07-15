@@ -13,7 +13,7 @@ type Screen struct {
 
 // Seat reflects bookings in DB
 type Seat struct {
-	ID         int       `json:"id"`
+	ID         int       `json:"-"`
 	Row        int       `json:"row_id"`
 	Column     int       `json:"column_id"`
 	UserID     string    `json:"user_id"`

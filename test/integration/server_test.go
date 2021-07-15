@@ -5,13 +5,13 @@ package integration
 import (
 	"encoding/json"
 	"fmt"
-	_ "github.com/lib/pq"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
-	"tiki/config"
+	"tiki/cmd/api/config"
 	"tiki/internal/api"
 	"tiki/internal/api/dictionary"
 	"tiki/internal/api/utils"
@@ -20,7 +20,7 @@ import (
 const (
 	HeaderContentType = "Content-Type"
 	JSONContentType   = "application/json"
-	Authorization     = "Authorization"
+	Token             = "token"
 )
 
 var token string
@@ -51,7 +51,7 @@ func (s *serverTestSuite) SetupSuite() {
 }
 
 func (s *serverTestSuite) Test1Login() {
-	reqStr := `{"user_id": "firstUser", "password": "example"}`
+	reqStr := `{"user_id": "tester", "password": "example"}`
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%s/login", s.cfg.RestfulAPI.Host, s.cfg.RestfulAPI.Port), strings.NewReader(reqStr))
 	s.NoError(err)
 
@@ -72,41 +72,56 @@ func (s *serverTestSuite) Test1Login() {
 	response.Body.Close()
 }
 
-func (s *serverTestSuite) TestListBookings() {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s:%s/bookings?created_date=2020-06-29", s.cfg.RestfulAPI.Host, s.cfg.RestfulAPI.Port), nil)
+func (s *serverTestSuite) TestCheckAvailable() {
+	reqStr := `{"screen_id": 1,"location": {"row": 1,"column": 1}}`
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%s/check", s.cfg.RestfulAPI.Host, s.cfg.RestfulAPI.Port), strings.NewReader(reqStr))
 	s.NoError(err)
 
 	req.Header.Set(HeaderContentType, JSONContentType)
-	req.Header.Set(Authorization, token)
+	cookie := &http.Cookie{
+		Name:   Token,
+		Value:  token,
+		MaxAge: 300,
+	}
+	req.AddCookie(cookie)
 
 	client := http.Client{}
 	response, err := client.Do(req)
 	s.NoError(err)
-	s.Equal(http.StatusOK, response.StatusCode)
+	s.Equal(http.StatusInternalServerError, response.StatusCode)
+	responseData := utils.ErrorCommonResponse{}
+	byteBody, err := ioutil.ReadAll(response.Body)
+	s.NoError(err)
+
+	err = json.Unmarshal(byteBody, &responseData)
+	s.NoError(err)
+	s.Equal(responseData.ErrorStr, dictionary.SeatBooked)
 	response.Body.Close()
 }
 
-func (s *serverTestSuite) TestAddBooking() {
-	reqStr := `{"content": "a"}`
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%s/bookings", s.cfg.RestfulAPI.Host, s.cfg.RestfulAPI.Port), strings.NewReader(reqStr))
+func (s *serverTestSuite) TestCheckBooking() {
+	reqStr := `{"screen_id": 1,"number": 0,"locations": [{"row": 0,"column":0}]}`
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%s/booking", s.cfg.RestfulAPI.Host, s.cfg.RestfulAPI.Port), strings.NewReader(reqStr))
 	s.NoError(err)
 
 	req.Header.Set(HeaderContentType, JSONContentType)
-	req.Header.Set(Authorization, token)
+	cookie := &http.Cookie{
+		Name:   Token,
+		Value:  token,
+		MaxAge: 300,
+	}
+	req.AddCookie(cookie)
 
 	client := http.Client{}
 	response, err := client.Do(req)
 	s.NoError(err)
-	if http.StatusOK != response.StatusCode {
-		responseData := utils.ErrorCommonResponse{}
-		byteBody, err := ioutil.ReadAll(response.Body)
-		s.NoError(err)
+	s.Equal(http.StatusInternalServerError, response.StatusCode)
+	responseData := utils.ErrorCommonResponse{}
+	byteBody, err := ioutil.ReadAll(response.Body)
+	s.NoError(err)
 
-		err = json.Unmarshal(byteBody, &responseData)
-		s.Equal(responseData.ErrorStr, dictionary.UserReachBookingLimit)
-		s.NoError(err)
-	} else {
-		s.Equal(http.StatusOK, response.StatusCode)
-	}
+	err = json.Unmarshal(byteBody, &responseData)
+	s.NoError(err)
+	s.Equal(responseData.ErrorStr, dictionary.SeatBooked)
 	response.Body.Close()
 }

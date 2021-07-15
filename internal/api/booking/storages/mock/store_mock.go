@@ -66,10 +66,10 @@ func (mr *MockStoreMockRecorder) GetScreenByID(arg0, arg1 interface{}) *gomock.C
 }
 
 // InsertScreen mocks base method.
-func (m *MockStore) InsertScreen(arg0 context.Context, arg1 *storages.Screen) (*int, error) {
+func (m *MockStore) InsertScreen(arg0 context.Context, arg1 *storages.Screen) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertScreen", arg0, arg1)
-	ret0, _ := ret[0].(*int)
+	ret0, _ := ret[0].(int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

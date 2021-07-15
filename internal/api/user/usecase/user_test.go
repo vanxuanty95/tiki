@@ -40,11 +40,10 @@ func TestUser_IsValidate(t *testing.T) {
 				password: "example",
 			},
 			mockStoreGet: func() {
-				storage.EXPECT().Get(gomock.Any(), "test1").
+				storage.EXPECT().GetUserByID(gomock.Any(), "test1").
 					Return(&storages.User{
 						ID:       "test1",
 						Password: "$2a$14$BdgOuNVBU7sdGW9rIDIIv.MWXDdvTVKyTppb3qW03bmvz/6hhA1FO",
-						MaxTodo:  5,
 					}, nil)
 			},
 			want:    true,
@@ -59,11 +58,10 @@ func TestUser_IsValidate(t *testing.T) {
 				password: "random",
 			},
 			mockStoreGet: func() {
-				storage.EXPECT().Get(gomock.Any(), "test1").
+				storage.EXPECT().GetUserByID(gomock.Any(), "test1").
 					Return(&storages.User{
 						ID:       "test1",
 						Password: "$2a$14$BdgOuNVBU7sdGW9rIDIIv.MWXDdvTVKyTppb3qW03bmvz/6hhA1FO",
-						MaxTodo:  5,
 					}, nil)
 			},
 			want:    false,
@@ -78,7 +76,7 @@ func TestUser_IsValidate(t *testing.T) {
 				password: "random",
 			},
 			mockStoreGet: func() {
-				storage.EXPECT().Get(gomock.Any(), "test1").
+				storage.EXPECT().GetUserByID(gomock.Any(), "test1").
 					Return(nil, errors.New("storage got error"))
 			},
 			want:    false,

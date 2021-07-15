@@ -13,5 +13,11 @@ unit_test:
 integration_test:
 	go test -tags=integration ./...
 
-run:
+run_directly:
 	go run *.go -state local
+
+build_image:
+	docker build -t tiki-go .
+
+run_container:
+	docker run tiki-go
