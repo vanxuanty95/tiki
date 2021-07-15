@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `screen` (
                           PRIMARY KEY (`id`),
                           KEY `user_id_idx_screen_id` (`user_id`),
                           CONSTRAINT `screen_id_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS  `seat` (
                         `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS  `seat` (
                         KEY `id_idx` (`screen_id`),
                         CONSTRAINT `screen_id` FOREIGN KEY (`screen_id`) REFERENCES `screen` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
                         CONSTRAINT `user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `user` (
                         `id` varchar(50) NOT NULL,
