@@ -118,4 +118,4 @@ CREATE TABLE IF NOT EXISTS  `seat` (
 ```
 
 ### Sequence diagram
-![auth and create bookings request](https://tiki/blob/master/docs/sequence.png)
+![auth and create bookings request](https://raw.githubusercontent.com/vanxuanty95/tiki/master/docs/sequence.png)
