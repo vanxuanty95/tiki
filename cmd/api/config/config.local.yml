@@ -8,4 +8,5 @@ db:
   username: "user"
   password: "password"
 jwt_key: "wqGyEBBfPK9w3Lxw"
-ss_expire: 15m
+ss_expire: 24h
+distance: 2

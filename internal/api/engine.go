@@ -61,6 +61,7 @@ func CreateHandler(cfg *config.Config) (*UserHandler.User, *BookingHandler.Booki
 		Store: userStore,
 	}
 	bookingUC := bookingUseCase.Booking{
+		Cfg:             cfg,
 		Store:           bookingStore,
 		UserStore:       userStore,
 		GeneratorUUIDFn: utils.GenerateNewUUID,
@@ -69,6 +70,7 @@ func CreateHandler(cfg *config.Config) (*UserHandler.User, *BookingHandler.Booki
 	return &UserHandler.User{
 			UserUC: userUC,
 		}, &BookingHandler.Booking{
+			Cfg:       cfg,
 			BookingUC: bookingUC,
 		}, nil
 }
@@ -87,13 +89,22 @@ func (s *ToDoHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 			s.UserTp.Login(resp, req)
 			return
 		}
-	case "/bookings":
+	case "/screen":
 		switch req.Method {
-		case http.MethodGet:
-			s.BookingTp.List(resp, req)
-			return
 		case http.MethodPost:
-			s.BookingTp.Add(resp, req)
+			s.BookingTp.AddScreen(resp, req)
+			return
+		}
+	case "/booking":
+		switch req.Method {
+		case http.MethodPost:
+			s.BookingTp.Booking(resp, req)
+			return
+		}
+	case "/check":
+		switch req.Method {
+		case http.MethodPost:
+			s.BookingTp.Check(resp, req)
 			return
 		}
 	default:

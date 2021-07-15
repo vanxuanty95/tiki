@@ -2,10 +2,8 @@ package utils
 
 import "time"
 
-const (
-	DefaultLayout = "2006-01-02"
-)
+const DefaultLayoutDB = "2006-01-02 15:04:05"
 
-func GetTimeNowWithDefaultLayoutInString() string {
-	return time.Now().Format(DefaultLayout)
+func GetTimeNow() time.Time {
+	return time.Now()
 }

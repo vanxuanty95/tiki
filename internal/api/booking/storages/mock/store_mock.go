@@ -7,9 +7,9 @@ package mock
 import (
 	context "context"
 	reflect "reflect"
+	storages "tiki/internal/api/booking/storages"
 
 	gomock "github.com/golang/mock/gomock"
-	storages "tiki/internal/api/booking/storages"
 )
 
 // MockStore is a mock of Store interface.
@@ -35,31 +35,61 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
-// AddBooking mocks base method.
-func (m *MockStore) AddBooking(arg0 context.Context, arg1 *storages.Booking) error {
+// GetAllSeatByScreenID mocks base method.
+func (m *MockStore) GetAllSeatByScreenID(arg0 context.Context, arg1 int) ([]*storages.Seat, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddBooking", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// AddBooking indicates an expected call of AddBooking.
-func (mr *MockStoreMockRecorder) AddBooking(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddBooking", reflect.TypeOf((*MockStore)(nil).AddBooking), arg0, arg1)
-}
-
-// RetrieveBookings mocks base method.
-func (m *MockStore) RetrieveBookings(arg0 context.Context, arg1, arg2 string, arg3, arg4 int) ([]*storages.Booking, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RetrieveBookings", arg0, arg1, arg2, arg3, arg4)
-	ret0, _ := ret[0].([]*storages.Booking)
+	ret := m.ctrl.Call(m, "GetAllSeatByScreenID", arg0, arg1)
+	ret0, _ := ret[0].([]*storages.Seat)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// RetrieveBookings indicates an expected call of RetrieveBookings.
-func (mr *MockStoreMockRecorder) RetrieveBookings(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+// GetAllSeatByScreenID indicates an expected call of GetAllSeatByScreenID.
+func (mr *MockStoreMockRecorder) GetAllSeatByScreenID(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RetrieveBookings", reflect.TypeOf((*MockStore)(nil).RetrieveBookings), arg0, arg1, arg2, arg3, arg4)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSeatByScreenID", reflect.TypeOf((*MockStore)(nil).GetAllSeatByScreenID), arg0, arg1)
+}
+
+// GetScreenByID mocks base method.
+func (m *MockStore) GetScreenByID(arg0 context.Context, arg1 int) (*storages.Screen, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetScreenByID", arg0, arg1)
+	ret0, _ := ret[0].(*storages.Screen)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetScreenByID indicates an expected call of GetScreenByID.
+func (mr *MockStoreMockRecorder) GetScreenByID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetScreenByID", reflect.TypeOf((*MockStore)(nil).GetScreenByID), arg0, arg1)
+}
+
+// InsertScreen mocks base method.
+func (m *MockStore) InsertScreen(arg0 context.Context, arg1 *storages.Screen) (*int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertScreen", arg0, arg1)
+	ret0, _ := ret[0].(*int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InsertScreen indicates an expected call of InsertScreen.
+func (mr *MockStoreMockRecorder) InsertScreen(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertScreen", reflect.TypeOf((*MockStore)(nil).InsertScreen), arg0, arg1)
+}
+
+// InsertSeats mocks base method.
+func (m *MockStore) InsertSeats(arg0 context.Context, arg1 []*storages.Seat) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertSeats", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertSeats indicates an expected call of InsertSeats.
+func (mr *MockStoreMockRecorder) InsertSeats(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertSeats", reflect.TypeOf((*MockStore)(nil).InsertSeats), arg0, arg1)
 }

@@ -27,6 +27,7 @@ type (
 		} `yaml:"db"`
 		JWTKey   string        `yaml:"jwt_key"`
 		SSExpire time.Duration `yaml:"ss_expire"`
+		Distance int           `yaml:"distance"`
 	}
 )
 

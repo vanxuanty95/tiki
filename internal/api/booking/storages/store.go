@@ -6,6 +6,9 @@ import (
 
 //go:generate mockgen -package mock -destination mock/store_mock.go . Store
 type Store interface {
-	RetrieveBookings(ctx context.Context, userID, createdDate string, page, limit int) ([]*Booking, error)
-	AddBooking(ctx context.Context, t *Booking) error
+	InsertScreen(ctx context.Context, s *Screen) (*int, error)
+	GetScreenByID(ctx context.Context, id int) (*Screen, error)
+
+	GetAllSeatByScreenID(ctx context.Context, id int) ([]*Seat, error)
+	InsertSeats(ctx context.Context, seats []*Seat) error
 }

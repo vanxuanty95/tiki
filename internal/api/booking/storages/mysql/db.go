@@ -13,51 +13,88 @@ type MySQLDB struct {
 	DB *sql.DB
 }
 
-// RetrieveBookings returns bookings if match userID AND createDate.
-func (l *MySQLDB) RetrieveBookings(ctx context.Context, userID, createdDate string, page, limit int) ([]*storages.Booking, error) {
-
-	limit, offset := utils.GetLimitOffsetFormPageNutikier(page, limit)
-
-	userIDSQL := sql.NullString{
-		String: userID,
-		Valid:  true,
+// InsertScreen will create new screen.
+func (l *MySQLDB) InsertScreen(ctx context.Context, s *storages.Screen) (*int, error) {
+	query := `INSERT INTO screen (number_seat_row, number_seat_column, created_date, user_id) VALUES (?, ?, ?, ?)`
+	res, err := l.DB.ExecContext(ctx, query, &s.NumberSeatRow, &s.NumberSeatColumn, &s.CreatedDate, &s.UserID)
+	if err != nil {
+		return nil, err
 	}
-	createdDateSql := sql.NullString{
-		String: createdDate,
-		Valid:  true,
+	newID, err := res.LastInsertId()
+	newIDInt := int(newID)
+	if err != nil {
+		return nil, err
 	}
+	return &newIDInt, nil
+}
 
-	query := `SELECT id, content, user_id, created_date FROM bookings WHERE user_id = $1 AND created_date = $2 LIMIT $3 OFFSET $4`
-	rows, err := l.DB.QueryContext(ctx, query, userIDSQL, createdDateSql, limit, offset)
+func (l *MySQLDB) GetScreenByID(ctx context.Context, id int) (*storages.Screen, error) {
+	query := `SELECT * FROM screen WHERE id = ?`
+	rows, err := l.DB.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var bookings []*storages.Booking
-	var creDateType time.Time
-	for rows.Next() {
-		t := &storages.Booking{}
-		err := rows.Scan(&t.ID, &t.Content, &t.UserID, &creDateType)
-		if err != nil {
-			return nil, err
-		}
-		t.CreatedDate = creDateType.Format(utils.DefaultLayout)
-		bookings = append(bookings, t)
+	if !rows.Next() {
+		return nil, nil
 	}
 
-	if err := rows.Err(); err != nil {
+	screen := &storages.Screen{}
+	var createdDateStr string
+	err = rows.Scan(&screen.ID, &screen.NumberSeatRow, &screen.NumberSeatColumn, &createdDateStr, &screen.UserID)
+	if err != nil {
 		return nil, err
 	}
 
-	return bookings, nil
+	t, err := time.Parse(utils.DefaultLayoutDB, createdDateStr)
+	if err != nil {
+		return nil, err
+	}
+
+	screen.CreatedDate = t
+
+	return screen, nil
 }
 
-// AddBooking adds a new booking to DB
-func (l *MySQLDB) AddBooking(ctx context.Context, t *storages.Booking) error {
-	query := `INSERT INTO bookings (id, content, user_id, created_date) VALUES ($1, $2, $3, $4)`
-	if _, err := l.DB.ExecContext(ctx, query, &t.ID, &t.Content, &t.UserID, &t.CreatedDate); err != nil {
+func (l *MySQLDB) GetAllSeatByScreenID(ctx context.Context, id int) ([]*storages.Seat, error) {
+	query := `SELECT * FROM seat WHERE screen_id = ?`
+	rows, err := l.DB.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var seats []*storages.Seat
+	for rows.Next() {
+		var createdDateStr string
+		seat := &storages.Seat{}
+		err = rows.Scan(&seat.ID, &seat.Row, &seat.Column, &seat.UserID, &seat.ScreenID, &createdDateStr)
+		if err != nil {
+			return nil, err
+		}
+		t, err := time.Parse(utils.DefaultLayoutDB, createdDateStr)
+		if err != nil {
+			return nil, err
+		}
+		seat.BookedDate = t
+		seats = append(seats, seat)
+	}
+	return seats, nil
+}
+
+func (l *MySQLDB) InsertSeats(ctx context.Context, seats []*storages.Seat) error {
+	sqlStr := `INSERT INTO seat (row_id, column_id, user_id, screen_id, booked_date) VALUES `
+	var vals []interface{}
+
+	for _, row := range seats {
+		sqlStr += `(?, ?, ?, ?, ?),`
+		vals = append(vals, row.Row, row.Column, row.UserID, row.ScreenID, row.BookedDate)
+	}
+	sqlStr = sqlStr[0 : len(sqlStr)-1]
+	stmt, err := l.DB.PrepareContext(ctx, sqlStr)
+	if err != nil {
 		return err
 	}
-	return nil
+	_, err = stmt.ExecContext(ctx, vals...)
+	return err
 }

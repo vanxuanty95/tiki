@@ -5,14 +5,22 @@ import (
 	"fmt"
 	"github.com/go-playground/validator"
 	"golang.org/x/crypto/bcrypt"
-	"strconv"
+	"reflect"
 	"strings"
-	"tiki/internal/pkg/logger"
-	"time"
+	"tiki/internal/api/booking/storages/model"
 )
 
 func ValidateRequest(req interface{}) error {
 	v := validator.New()
+
+	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		if name == "-" {
+			return ""
+		}
+		return name
+	})
+
 	err := v.Struct(req)
 	var result []string
 	if err != nil {
@@ -29,28 +37,15 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-func ValidateDateFromString(dateStr string, layout string) bool {
-	_, err := time.Parse(layout, dateStr)
-	if err != nil {
-		logger.Errorln(err)
+func ValidateBookingRequest(request *model.BookingRequest) bool {
+	if request == nil {
+		return false
+	}
+	if request.Number == 0 && request.Locations == nil {
+		return false
+	}
+	if request.Number != 0 && request.Locations != nil {
 		return false
 	}
 	return true
-}
-
-func ValidateInputIsInteger(input string) (int, bool) {
-	if input == "" {
-		return 0, false
-	}
-	value, err := strconv.Atoi(input)
-	if err != nil {
-		logger.Errorln(err)
-		return value, false
-	}
-	return value, true
 }

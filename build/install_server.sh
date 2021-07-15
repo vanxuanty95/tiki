@@ -3,10 +3,12 @@
 PWD=$(dirname "$0")
 docker-compose -f $PWD/docker-compose.yml up -d --build
 
-sleep 10
+while ! docker exec -it tiki_mysql mysql -uuser -ppassword -e "SELECT 1" &> /dev/null ; do
+    echo "Waiting for database connection..."
+    sleep 1
+done
 
-docker cp $PWD/init_database.sql tiki_mysql:/docker-entrypoint-initdb.d/init_database.sql
-docker exec -it tiki_mysql psql -d togo -U user -f docker-entrypoint-initdb.d/init_database.sql
+docker exec -it tiki_mysql mysql -uuser -ppassword -e "$(cat $PWD/init_database.sql)"
 
 docker-compose -f $PWD/docker-compose.yml stop
 
