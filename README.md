@@ -56,7 +56,7 @@ Before entering Handlers layer, middleware will print request information to log
 
 # Interact with the API
 
-Please get postman file in `docs/` directory
+###Please get postman file in `docs/` directory first
 
 __Login__
 
